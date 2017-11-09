@@ -5,6 +5,7 @@ import com.elpassion.mspek.MiniSpek.o
 import com.elpassion.mspek.MiniSpekRunner
 import com.jakewharton.rxrelay2.PublishRelay
 import com.nhaarman.mockito_kotlin.*
+import io.ghostbuster91.android.react.component.example.typeahead.TypeAhead
 import io.ghostbuster91.android.react.component.example.typeahead.TypeAhead.*
 import io.ghostbuster91.android.react.component.example.typeahead.TypeAheadReducer
 import io.ghostbuster91.android.react.component.example.utils.assertLastValue
@@ -23,7 +24,7 @@ class TypeAheadReducerTest {
         var apiSubject = SingleSubject.create<Boolean>()
         val api = mock<Api> { on { call(any()) } doAnswer { apiSubject = SingleSubject.create();apiSubject } }
         val events = PublishRelay.create<Event>()
-        val stateRelay = BehaviorSubject.createDefault(ValidationState.IDLE)
+        val stateRelay = BehaviorSubject.createDefault(TypeAhead.initialState)
         val scheduler = TestScheduler()
 
         TypeAheadReducer(api, scheduler).run {
