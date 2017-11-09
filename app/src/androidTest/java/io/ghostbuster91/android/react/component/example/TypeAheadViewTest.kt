@@ -9,7 +9,6 @@ import com.nhaarman.mockito_kotlin.any
 import com.nhaarman.mockito_kotlin.doAnswer
 import com.nhaarman.mockito_kotlin.mock
 import io.ghostbuster91.android.react.component.example.typeahead.TypeAhead
-import io.reactivex.schedulers.Schedulers
 import io.reactivex.subjects.SingleSubject
 import org.junit.Before
 import org.junit.Rule
@@ -21,7 +20,6 @@ class TypeAheadViewTest {
 
     private var subject = SingleSubject.create<Boolean>()
     private val api = mock<TypeAhead.Api> { on { call(any()) } doAnswer { subject = SingleSubject.create();subject } }
-    private val scheduler = Schedulers.io()
 
     @Rule
     @JvmField
@@ -30,7 +28,6 @@ class TypeAheadViewTest {
     @Before
     fun setUp() {
         typAheadApiProvider = { api }
-        typeAheadSchedulerProvider = { scheduler }
     }
 
     @Test
