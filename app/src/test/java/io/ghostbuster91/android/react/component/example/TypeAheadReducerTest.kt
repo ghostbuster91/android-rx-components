@@ -9,6 +9,7 @@ import io.ghostbuster91.android.react.component.example.typeahead.TypeAhead
 import io.ghostbuster91.android.react.component.example.typeahead.TypeAhead.*
 import io.ghostbuster91.android.react.component.example.typeahead.TypeAheadReducer
 import io.ghostbuster91.android.react.component.example.utils.assertLastValue
+import io.reactivex.schedulers.Schedulers
 import io.reactivex.schedulers.TestScheduler
 import io.reactivex.subjects.BehaviorSubject
 import io.reactivex.subjects.SingleSubject
@@ -27,7 +28,7 @@ class TypeAheadReducerTest {
         val stateRelay = BehaviorSubject.createDefault(TypeAhead.initialState)
         val scheduler = TestScheduler()
 
-        TypeAheadReducer(api, scheduler).run {
+        TypeAheadReducer(api, ioScheduler = Schedulers.trampoline(), uiScheduler = Schedulers.trampoline(), debounceScheduler = scheduler).run {
             invoke(events, stateRelay).subscribe(stateRelay)
         }
         val state = stateRelay.test()
@@ -47,7 +48,7 @@ class TypeAheadReducerTest {
                 state.assertLastValue(ValidationState.LOADING)
             }
             "and time passes" o {
-                scheduler.advanceTimeBy(50, TimeUnit.MILLISECONDS)
+                scheduler.advanceTimeBy(TypeAheadReducer.DEBOUNCE_TIME, TimeUnit.MILLISECONDS)
                 "api is called with given text" o {
                     verify(api).call("a")
                 }
@@ -55,6 +56,12 @@ class TypeAheadReducerTest {
                     apiSubject.onSuccess(true)
                     "validation should be ok" o {
                         state.assertLastValue(ValidationState.FREE)
+                    }
+                    "after erasing text" o {
+                        events.accept(Event.TextChanged(""))
+                        "state should be idle" o {
+                            state.assertLastValue(ValidationState.IDLE)
+                        }
                     }
                 }
                 "after api return validation fail" o {

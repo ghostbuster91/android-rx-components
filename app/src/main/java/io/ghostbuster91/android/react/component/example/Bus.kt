@@ -3,9 +3,9 @@ package io.ghostbuster91.android.react.component.example
 import com.jakewharton.rxrelay2.BehaviorRelay
 import com.jakewharton.rxrelay2.PublishRelay
 import io.ghostbuster91.android.react.component.example.typeahead.TypeAhead
-import io.reactivex.Scheduler
 import io.reactivex.Single
-import io.reactivex.schedulers.Schedulers
+import java.util.*
+import java.util.concurrent.TimeUnit
 
 val events by lazy { PublishRelay.create<Any>() }
 val states: BehaviorRelay<TypeAhead.ValidationState> by lazy {
@@ -13,9 +13,14 @@ val states: BehaviorRelay<TypeAhead.ValidationState> by lazy {
 }
 var typAheadApiProvider: () -> TypeAhead.Api = {
     object : TypeAhead.Api {
+        val random = Random()
         override fun call(s: String): Single<Boolean> {
-            return Single.never()
+            val randomDelay = Math.abs(random.nextLong() % 100) + 100
+            return when (s) {
+                "internet" -> Single.error<Boolean>(RuntimeException()).delay(randomDelay, TimeUnit.MILLISECONDS)
+                "kasper" -> Single.just(false).delay(randomDelay, TimeUnit.MILLISECONDS)
+                else -> Single.just(true).delay(randomDelay, TimeUnit.MILLISECONDS)
+            }
         }
     }
 }
-var typeAheadSchedulerProvider: () -> Scheduler = { Schedulers.io() }

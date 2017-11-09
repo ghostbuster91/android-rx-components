@@ -14,10 +14,11 @@ import com.trello.rxlifecycle2.kotlin.bindToLifecycle
 import io.ghostbuster91.android.react.component.example.R
 import io.ghostbuster91.android.react.component.example.common.ReactiveView
 import io.ghostbuster91.android.react.component.example.typAheadApiProvider
-import io.ghostbuster91.android.react.component.example.typeAheadSchedulerProvider
 import io.ghostbuster91.android.react.component.example.typeahead.TypeAhead.Event
 import io.ghostbuster91.android.react.component.example.typeahead.TypeAhead.ValidationState
 import io.ghostbuster91.android.react.component.example.typeahead.TypeAheadReducer
+import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.type_ahead_view.view.*
 
 class TypeAheadView : LinearLayout, ReactiveView<ValidationState> {
@@ -41,7 +42,7 @@ class TypeAheadView : LinearLayout, ReactiveView<ValidationState> {
     }
 
     private fun bindReducer(events: Relay<Any>, states: Relay<ValidationState>) {
-        TypeAheadReducer(typAheadApiProvider(), typeAheadSchedulerProvider())
+        TypeAheadReducer(typAheadApiProvider(), ioScheduler = Schedulers.io(), debounceScheduler = Schedulers.computation(), uiScheduler = AndroidSchedulers.mainThread())
                 .invoke(events.ofType(Event::class.java), states)
                 .bindToLifecycle(this)
                 .subscribe(states)
@@ -65,6 +66,7 @@ class TypeAheadView : LinearLayout, ReactiveView<ValidationState> {
                             typeAheadLoadingIndicator.visibility = View.GONE
                         }
                         ValidationState.ERROR -> {
+                            typeAheadStatusIndicator.visibility = View.VISIBLE
                             typeAheadStatusIndicator.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_cloud_off_black_24dp))
                             typeAheadLoadingIndicator.visibility = View.GONE
                         }
@@ -73,10 +75,12 @@ class TypeAheadView : LinearLayout, ReactiveView<ValidationState> {
                             typeAheadLoadingIndicator.visibility = View.VISIBLE
                         }
                         ValidationState.OCCUPIED -> {
+                            typeAheadStatusIndicator.visibility = View.VISIBLE
                             typeAheadStatusIndicator.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_block_black_24dp))
                             typeAheadLoadingIndicator.visibility = View.GONE
                         }
                         ValidationState.FREE -> {
+                            typeAheadStatusIndicator.visibility = View.VISIBLE
                             typeAheadStatusIndicator.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_done_black_24dp))
                             typeAheadLoadingIndicator.visibility = View.GONE
                         }
