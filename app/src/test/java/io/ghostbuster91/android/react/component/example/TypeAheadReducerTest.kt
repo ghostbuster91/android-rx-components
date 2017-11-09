@@ -35,6 +35,12 @@ class TypeAheadReducerTest {
         "show nothing on start" o {
             state.assertLastValue(ValidationState.IDLE)
         }
+        "after text changed to empty" o {
+            events.accept(Event.TextChanged(""))
+            "still show idle state" o {
+                state.assertLastValue(ValidationState.IDLE)
+            }
+        }
         "after typing text" o {
             events.accept(Event.TextChanged("a"))
             "loader should be shown" o {

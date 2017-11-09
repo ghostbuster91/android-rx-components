@@ -11,6 +11,7 @@ class TypeAheadReducer(private val api: TypeAhead.Api,
                        private val scheduler: Scheduler) : Reducer<TypeAhead.Event, TypeAhead.ValidationState> {
     override fun invoke(events: Observable<TypeAhead.Event>, states: Observable<TypeAhead.ValidationState>): Observable<TypeAhead.ValidationState> {
         return events.ofType(TypeAhead.Event.TextChanged::class.java)
+                .filter { it.text.isNotEmpty() }
                 .switchMap { event ->
                     Single.timer(50, TimeUnit.MILLISECONDS, scheduler)
                             .flatMap {
