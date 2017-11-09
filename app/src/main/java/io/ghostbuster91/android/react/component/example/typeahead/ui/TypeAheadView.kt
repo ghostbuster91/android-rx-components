@@ -23,6 +23,7 @@ import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.type_ahead_view.view.*
+import java.util.*
 
 class TypeAheadView : LinearLayout, ReactiveView<ValidationState> {
     constructor(context: Context) : super(context)
@@ -38,6 +39,8 @@ class TypeAheadView : LinearLayout, ReactiveView<ValidationState> {
         LayoutInflater.from(context).inflate(R.layout.type_ahead_view, this, true)
     }
 
+    private val identifier = UUID.randomUUID().toString()
+
     override fun bind(events: Relay<Any>, states: Observable<ValidationState>, function: (ValidationState) -> State, globalState: BehaviorRelay<State>) {
         bindReducer(events, states, function, globalState)
         bindEvents(events)
@@ -46,7 +49,7 @@ class TypeAheadView : LinearLayout, ReactiveView<ValidationState> {
 
     private fun bindReducer(events: Relay<Any>, states: Observable<ValidationState>, function: (ValidationState) -> State, globalState: BehaviorRelay<State>) {
         TypeAheadReducer(typAheadApiProvider(), ioScheduler = Schedulers.io(), debounceScheduler = Schedulers.computation(), uiScheduler = AndroidSchedulers.mainThread())
-                .invoke(events.ofType(Event.TextChanged::class.java), states)
+                .invoke(events.ofType(Event.TextChanged::class.java).filter { it.identifier == identifier }, states)
                 .bindToLifecycle(this)
                 .map { function(it) }
                 .subscribe(globalState)
@@ -55,7 +58,7 @@ class TypeAheadView : LinearLayout, ReactiveView<ValidationState> {
     private fun bindEvents(events: Relay<Any>) {
         typeAheadInput.textChanges()
                 .bindToLifecycle(this)
-                .map { Event.TextChanged(it.toString()) }
+                .map { Event.TextChanged(it.toString(), identifier) }
                 .subscribe(events)
     }
 

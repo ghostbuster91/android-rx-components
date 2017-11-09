@@ -8,7 +8,7 @@ interface TypeAhead {
     }
 
     sealed class Event {
-        data class TextChanged(val text: String) : Event()
+        data class TextChanged(val text: String, val identifier: String = "default") : Event()
     }
 
     enum class ValidationState {
