@@ -8,8 +8,8 @@ import java.util.*
 import java.util.concurrent.TimeUnit
 
 val events by lazy { PublishRelay.create<Any>() }
-val states: BehaviorRelay<TypeAhead.ValidationState> by lazy {
-    BehaviorRelay.createDefault(TypeAhead.initialState)
+val states: BehaviorRelay<State> by lazy {
+    BehaviorRelay.createDefault(State(TypeAhead.initialState, TypeAhead.initialState))
 }
 var typAheadApiProvider: () -> TypeAhead.Api = {
     object : TypeAhead.Api {
@@ -24,3 +24,6 @@ var typAheadApiProvider: () -> TypeAhead.Api = {
         }
     }
 }
+
+data class State(val firstTypeAhead: TypeAhead.ValidationState,
+                 val secondTypeAhead: TypeAhead.ValidationState)

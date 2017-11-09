@@ -2,7 +2,6 @@ package io.ghostbuster91.android.react.component.example.typeahead
 
 import io.ghostbuster91.android.react.component.example.common.Reducer
 import io.ghostbuster91.android.react.component.example.common.startWith
-import io.ghostbuster91.android.react.component.example.typeahead.TypeAhead.Event
 import io.ghostbuster91.android.react.component.example.typeahead.TypeAhead.ValidationState
 import io.reactivex.Observable
 import io.reactivex.Observable.merge
@@ -13,10 +12,10 @@ import java.util.concurrent.TimeUnit
 class TypeAheadReducer(private val api: TypeAhead.Api,
                        private val debounceScheduler: Scheduler,
                        private val ioScheduler: Scheduler,
-                       private val uiScheduler: Scheduler) : Reducer<TypeAhead.Event, TypeAhead.ValidationState> {
+                       private val uiScheduler: Scheduler) : Reducer<TypeAhead.Event.TextChanged, TypeAhead.ValidationState> {
 
-    override fun invoke(events: Observable<TypeAhead.Event>, states: Observable<TypeAhead.ValidationState>): Observable<TypeAhead.ValidationState> {
-        return merge(events.ofType(Event.TextChanged::class.java)
+    override fun invoke(events: Observable<TypeAhead.Event.TextChanged>, states: Observable<TypeAhead.ValidationState>): Observable<TypeAhead.ValidationState> {
+        return merge(events
                 .filter { it.text.isNotEmpty() }
                 .switchMap { event ->
                     Single.timer(DEBOUNCE_TIME, TimeUnit.MILLISECONDS, debounceScheduler)
@@ -28,7 +27,7 @@ class TypeAheadReducer(private val api: TypeAhead.Api,
                                         .onErrorReturn { ValidationState.ERROR }
                             }
                             .startWith(ValidationState.LOADING)
-                }, events.ofType(Event.TextChanged::class.java).filter { it.text.isEmpty() }.map { ValidationState.IDLE })
+                }, events.filter { it.text.isEmpty() }.map { ValidationState.IDLE })
     }
 
     companion object {

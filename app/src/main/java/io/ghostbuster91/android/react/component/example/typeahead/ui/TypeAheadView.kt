@@ -9,14 +9,17 @@ import android.view.LayoutInflater
 import android.view.View
 import android.widget.LinearLayout
 import com.jakewharton.rxbinding2.widget.textChanges
+import com.jakewharton.rxrelay2.BehaviorRelay
 import com.jakewharton.rxrelay2.Relay
 import com.trello.rxlifecycle2.kotlin.bindToLifecycle
 import io.ghostbuster91.android.react.component.example.R
+import io.ghostbuster91.android.react.component.example.State
 import io.ghostbuster91.android.react.component.example.common.ReactiveView
 import io.ghostbuster91.android.react.component.example.typAheadApiProvider
 import io.ghostbuster91.android.react.component.example.typeahead.TypeAhead.Event
 import io.ghostbuster91.android.react.component.example.typeahead.TypeAhead.ValidationState
 import io.ghostbuster91.android.react.component.example.typeahead.TypeAheadReducer
+import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.type_ahead_view.view.*
@@ -35,17 +38,18 @@ class TypeAheadView : LinearLayout, ReactiveView<ValidationState> {
         LayoutInflater.from(context).inflate(R.layout.type_ahead_view, this, true)
     }
 
-    override fun bind(events: Relay<Any>, states: Relay<ValidationState>) {
-        bindReducer(events, states)
+    override fun bind(events: Relay<Any>, states: Observable<ValidationState>, function: (ValidationState) -> State, globalState: BehaviorRelay<State>) {
+        bindReducer(events, states, function, globalState)
         bindEvents(events)
         bindStates(states)
     }
 
-    private fun bindReducer(events: Relay<Any>, states: Relay<ValidationState>) {
+    private fun bindReducer(events: Relay<Any>, states: Observable<ValidationState>, function: (ValidationState) -> State, globalState: BehaviorRelay<State>) {
         TypeAheadReducer(typAheadApiProvider(), ioScheduler = Schedulers.io(), debounceScheduler = Schedulers.computation(), uiScheduler = AndroidSchedulers.mainThread())
-                .invoke(events.ofType(Event::class.java), states)
+                .invoke(events.ofType(Event.TextChanged::class.java), states)
                 .bindToLifecycle(this)
-                .subscribe(states)
+                .map { function(it) }
+                .subscribe(globalState)
     }
 
     private fun bindEvents(events: Relay<Any>) {
@@ -55,7 +59,7 @@ class TypeAheadView : LinearLayout, ReactiveView<ValidationState> {
                 .subscribe(events)
     }
 
-    private fun bindStates(states: Relay<ValidationState>) {
+    private fun bindStates(states: Observable<ValidationState>) {
         states
                 .bindToLifecycle(this)
                 .distinctUntilChanged()

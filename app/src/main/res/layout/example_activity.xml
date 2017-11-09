@@ -9,4 +9,9 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
 
+    <io.ghostbuster91.android.react.component.example.typeahead.ui.TypeAheadView
+        android:id="@+id/secondTypeAheadView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
 </LinearLayout>

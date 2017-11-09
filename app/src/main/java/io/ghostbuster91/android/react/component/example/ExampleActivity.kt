@@ -9,6 +9,7 @@ class ExampleActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.example_activity)
-        typeAheadView.bind(events, states)
+        typeAheadView.bind(events, states.map { it.firstTypeAhead }, { new -> states.blockingFirst().copy(firstTypeAhead = new) }, states)
+        secondTypeAheadView.bind(events, states.map { it.secondTypeAhead }, { new ->  states.blockingFirst().copy(secondTypeAhead = new) }, states)
     }
 }
