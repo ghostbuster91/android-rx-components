@@ -16,7 +16,7 @@ import org.junit.runner.RunWith
 import java.util.concurrent.TimeUnit
 
 @RunWith(MiniSpekRunner::class)
-class TypeaheadReducerTest {
+class TypeAheadReducerTest {
 
     @Test
     fun should() = mspek("start") {
