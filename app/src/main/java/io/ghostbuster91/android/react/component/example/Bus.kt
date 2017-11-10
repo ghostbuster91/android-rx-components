@@ -3,7 +3,10 @@ package io.ghostbuster91.android.react.component.example
 import com.jakewharton.rxrelay2.BehaviorRelay
 import com.jakewharton.rxrelay2.PublishRelay
 import io.ghostbuster91.android.react.component.example.typeahead.TypeAhead
+import io.ghostbuster91.android.react.component.example.typeahead.TypeAheadReducer
 import io.reactivex.Single
+import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.schedulers.Schedulers
 import java.util.*
 import java.util.concurrent.TimeUnit
 
@@ -27,3 +30,14 @@ var typAheadApiProvider: () -> TypeAhead.Api = {
 
 data class State(val firstTypeAhead: TypeAhead.ValidationState,
                  val secondTypeAhead: TypeAhead.ValidationState)
+
+val firstTypeAheadReducer by lazy { createTypeAheadReducer() }
+val secondTypeAheadReducer by lazy { createTypeAheadReducer() }
+
+private fun createTypeAheadReducer() =
+        TypeAheadReducer(
+                api = typAheadApiProvider(),
+                ioScheduler = Schedulers.io(),
+                debounceScheduler = Schedulers.computation(),
+                uiScheduler = AndroidSchedulers.mainThread())
+
