@@ -54,6 +54,15 @@ class TypeAheadReducerTest {
                 "api is called with given text" o {
                     verify(api).call("a")
                 }
+                "and text is removed" o {
+                    sendTextChangedEvent("", reducer.identifier)
+                    "and api return validation OK" o {
+                        apiSubject.onSuccess(true)
+                        "state should be idle" o {
+                            state.assertLastValue(ValidationState.IDLE)
+                        }
+                    }
+                }
                 "after api return validation OK" o {
                     apiSubject.onSuccess(true)
                     "validation should be ok" o {
@@ -102,7 +111,6 @@ class TypeAheadReducerTest {
                 state.assertLastValue(ValidationState.IDLE)
             }
         }
-
     }
 
     private fun sendTextChangedEvent(text: String, identifier: String) {

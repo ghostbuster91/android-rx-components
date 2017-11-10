@@ -23,17 +23,20 @@ class TypeAheadReducer(private val api: TypeAhead.Api,
                 .filter { it.identifier == identifier }
 
         return merge(relatedEvent
-                .filter { it.text.isNotEmpty() }
                 .switchMap { event ->
-                    Single.timer(DEBOUNCE_TIME, TimeUnit.MILLISECONDS, debounceScheduler)
-                            .flatMap {
-                                api.call(event.text)
-                                        .subscribeOn(ioScheduler)
-                                        .observeOn(uiScheduler)
-                                        .map { if (it) ValidationState.FREE else ValidationState.OCCUPIED }
-                                        .onErrorReturn { ValidationState.ERROR }
-                            }
-                            .startWith(ValidationState.LOADING)
+                    if (event.text.isNotEmpty()) {
+                        Single.timer(DEBOUNCE_TIME, TimeUnit.MILLISECONDS, debounceScheduler)
+                                .flatMap {
+                                    api.call(event.text)
+                                            .subscribeOn(ioScheduler)
+                                            .observeOn(uiScheduler)
+                                            .map { if (it) ValidationState.FREE else ValidationState.OCCUPIED }
+                                            .onErrorReturn { ValidationState.ERROR }
+                                }
+                                .startWith(ValidationState.LOADING)
+                    } else {
+                        Observable.empty()
+                    }
                 }, relatedEvent
                 .filter { it.text.isEmpty() }.map { ValidationState.IDLE })
     }
