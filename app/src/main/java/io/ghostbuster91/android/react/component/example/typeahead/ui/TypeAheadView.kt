@@ -5,25 +5,19 @@ import android.content.Context
 import android.os.Build
 import android.support.v4.content.ContextCompat
 import android.util.AttributeSet
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.widget.LinearLayout
 import com.jakewharton.rxbinding2.widget.textChanges
-import com.jakewharton.rxrelay2.BehaviorRelay
 import com.jakewharton.rxrelay2.Relay
 import com.trello.rxlifecycle2.kotlin.bindToLifecycle
 import io.ghostbuster91.android.react.component.example.R
-import io.ghostbuster91.android.react.component.example.State
 import io.ghostbuster91.android.react.component.example.common.ReactiveView
-import io.ghostbuster91.android.react.component.example.typAheadApiProvider
 import io.ghostbuster91.android.react.component.example.typeahead.TypeAhead.Event
 import io.ghostbuster91.android.react.component.example.typeahead.TypeAhead.ValidationState
-import io.ghostbuster91.android.react.component.example.typeahead.TypeAheadReducer
 import io.reactivex.Observable
-import io.reactivex.android.schedulers.AndroidSchedulers
-import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.type_ahead_view.view.*
-import java.util.*
 
 class TypeAheadView : LinearLayout, ReactiveView<ValidationState> {
     constructor(context: Context) : super(context)
@@ -39,23 +33,12 @@ class TypeAheadView : LinearLayout, ReactiveView<ValidationState> {
         LayoutInflater.from(context).inflate(R.layout.type_ahead_view, this, true)
     }
 
-    private val identifier = UUID.randomUUID().toString()
-
-    override fun bind(events: Relay<Any>, states: Observable<ValidationState>, function: (ValidationState) -> State, globalState: BehaviorRelay<State>) {
-        bindReducer(events, states, function, globalState)
-        bindEvents(events)
+    override fun bind(events: Relay<Any>, states: Observable<ValidationState>, identifier: String) {
+        bindEvents(events, identifier)
         bindStates(states)
     }
 
-    private fun bindReducer(events: Relay<Any>, states: Observable<ValidationState>, function: (ValidationState) -> State, globalState: BehaviorRelay<State>) {
-        TypeAheadReducer(typAheadApiProvider(), ioScheduler = Schedulers.io(), debounceScheduler = Schedulers.computation(), uiScheduler = AndroidSchedulers.mainThread())
-                .invoke(events.ofType(Event.TextChanged::class.java).filter { it.identifier == identifier }, states)
-                .bindToLifecycle(this)
-                .map { function(it) }
-                .subscribe(globalState)
-    }
-
-    private fun bindEvents(events: Relay<Any>) {
+    private fun bindEvents(events: Relay<Any>, identifier: String) {
         typeAheadInput.textChanges()
                 .bindToLifecycle(this)
                 .map { Event.TextChanged(it.toString(), identifier) }

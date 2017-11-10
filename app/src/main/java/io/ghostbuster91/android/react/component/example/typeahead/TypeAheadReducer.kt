@@ -7,15 +7,22 @@ import io.reactivex.Observable
 import io.reactivex.Observable.merge
 import io.reactivex.Scheduler
 import io.reactivex.Single
+import java.util.*
 import java.util.concurrent.TimeUnit
 
 class TypeAheadReducer(private val api: TypeAhead.Api,
                        private val debounceScheduler: Scheduler,
                        private val ioScheduler: Scheduler,
-                       private val uiScheduler: Scheduler) : Reducer<TypeAhead.Event.TextChanged, TypeAhead.ValidationState> {
+                       private val uiScheduler: Scheduler) : Reducer<Any, TypeAhead.ValidationState> {
 
-    override fun invoke(events: Observable<TypeAhead.Event.TextChanged>, states: Observable<TypeAhead.ValidationState>): Observable<TypeAhead.ValidationState> {
-        return merge(events
+    override val identifier: String = UUID.randomUUID().toString()
+
+    override fun invoke(events: Observable<out Any>, states: Observable<TypeAhead.ValidationState>): Observable<TypeAhead.ValidationState> {
+        val relatedEvent = events
+                .ofType(TypeAhead.Event.TextChanged::class.java)
+                .filter { it.identifier == identifier }
+
+        return merge(relatedEvent
                 .filter { it.text.isNotEmpty() }
                 .switchMap { event ->
                     Single.timer(DEBOUNCE_TIME, TimeUnit.MILLISECONDS, debounceScheduler)
@@ -27,7 +34,8 @@ class TypeAheadReducer(private val api: TypeAhead.Api,
                                         .onErrorReturn { ValidationState.ERROR }
                             }
                             .startWith(ValidationState.LOADING)
-                }, events.filter { it.text.isEmpty() }.map { ValidationState.IDLE })
+                }, relatedEvent
+                .filter { it.text.isEmpty() }.map { ValidationState.IDLE })
     }
 
     companion object {

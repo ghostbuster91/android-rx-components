@@ -20,15 +20,17 @@ import java.util.concurrent.TimeUnit
 @RunWith(MiniSpekRunner::class)
 class TypeAheadReducerTest {
 
+    val events = PublishRelay.create<Event.TextChanged>()
+
     @Test
     fun should() = mspek("start") {
         var apiSubject = SingleSubject.create<Boolean>()
         val api = mock<Api> { on { call(any()) } doAnswer { apiSubject = SingleSubject.create();apiSubject } }
-        val events = PublishRelay.create<Event.TextChanged>()
         val stateRelay = BehaviorSubject.createDefault(TypeAhead.initialState)
         val scheduler = TestScheduler()
 
-        TypeAheadReducer(api, ioScheduler = Schedulers.trampoline(), uiScheduler = Schedulers.trampoline(), debounceScheduler = scheduler).run {
+        val reducer = TypeAheadReducer(api, ioScheduler = Schedulers.trampoline(), uiScheduler = Schedulers.trampoline(), debounceScheduler = scheduler)
+        reducer.run {
             invoke(events, stateRelay).subscribe(stateRelay)
         }
         val state = stateRelay.test()
@@ -37,13 +39,13 @@ class TypeAheadReducerTest {
             state.assertLastValue(ValidationState.IDLE)
         }
         "after text changed to empty" o {
-            events.accept(Event.TextChanged(""))
+            sendTextChangedEvent("", reducer.identifier)
             "still show idle state" o {
                 state.assertLastValue(ValidationState.IDLE)
             }
         }
         "after typing text" o {
-            events.accept(Event.TextChanged("a"))
+            sendTextChangedEvent("a", reducer.identifier)
             "loader should be shown" o {
                 state.assertLastValue(ValidationState.LOADING)
             }
@@ -58,7 +60,7 @@ class TypeAheadReducerTest {
                         state.assertLastValue(ValidationState.FREE)
                     }
                     "after erasing text" o {
-                        events.accept(Event.TextChanged(""))
+                        sendTextChangedEvent("", reducer.identifier)
                         "state should be idle" o {
                             state.assertLastValue(ValidationState.IDLE)
                         }
@@ -76,7 +78,7 @@ class TypeAheadReducerTest {
                         state.assertLastValue(ValidationState.ERROR)
                     }
                     "and user type more" o {
-                        events.accept(Event.TextChanged("ab"))
+                        sendTextChangedEvent("ab", reducer.identifier)
                         "state is loading" o {
                             state.assertLastValue(ValidationState.LOADING)
                         }
@@ -93,5 +95,17 @@ class TypeAheadReducerTest {
                 }
             }
         }
+        "after text changed but in other component" o {
+            sendTextChangedEvent("a", "other identifier")
+
+            "should state be idle" o {
+                state.assertLastValue(ValidationState.IDLE)
+            }
+        }
+
+    }
+
+    private fun sendTextChangedEvent(text: String, identifier: String) {
+        events.accept(Event.TextChanged(text, identifier))
     }
 }

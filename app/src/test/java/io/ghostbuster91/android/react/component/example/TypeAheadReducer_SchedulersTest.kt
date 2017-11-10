@@ -33,13 +33,14 @@ class TypeAheadReducer_SchedulersTest {
         val uiScheduler = TestScheduler()
         val debounceScheduler = TestScheduler()
 
-        TypeAheadReducer(api, ioScheduler = ioScheduler, uiScheduler = uiScheduler, debounceScheduler = debounceScheduler).run {
+        val reducer = TypeAheadReducer(api, ioScheduler = ioScheduler, uiScheduler = uiScheduler, debounceScheduler = debounceScheduler)
+        reducer.run {
             invoke(events, stateRelay).subscribe(stateRelay)
         }
         val state = stateRelay.test()
 
         "after text changed" o {
-            events.accept(Event.TextChanged("a"))
+            events.accept(Event.TextChanged("a", reducer.identifier))
             "and time passses" o {
                 debounceScheduler.advanceTimeBy(TypeAheadReducer.DEBOUNCE_TIME, TimeUnit.MILLISECONDS)
 
