@@ -12,7 +12,7 @@ import java.util.concurrent.TimeUnit
 
 val events by lazy { PublishRelay.create<Any>() }
 val states: BehaviorRelay<State> by lazy {
-    BehaviorRelay.createDefault(State(TypeAhead.initialState, TypeAhead.initialState))
+    BehaviorRelay.create<State>()
 }
 var typAheadApiProvider: () -> TypeAhead.Api = {
     object : TypeAhead.Api {

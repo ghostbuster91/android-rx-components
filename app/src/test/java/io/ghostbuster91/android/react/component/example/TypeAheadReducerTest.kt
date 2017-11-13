@@ -26,7 +26,7 @@ class TypeAheadReducerTest {
     fun should() = mspek("start") {
         var apiSubject = SingleSubject.create<Boolean>()
         val api = mock<Api> { on { call(any()) } doAnswer { apiSubject = SingleSubject.create();apiSubject } }
-        val stateRelay = BehaviorSubject.createDefault(TypeAhead.initialState)
+        val stateRelay = BehaviorSubject.create<TypeAhead.ValidationState>()
         val scheduler = TestScheduler()
 
         val reducer = TypeAheadReducer(api, ioScheduler = Schedulers.trampoline(), uiScheduler = Schedulers.trampoline(), debounceScheduler = scheduler)

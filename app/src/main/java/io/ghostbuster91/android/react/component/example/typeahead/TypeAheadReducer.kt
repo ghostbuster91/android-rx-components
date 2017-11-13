@@ -39,6 +39,7 @@ class TypeAheadReducer(private val api: TypeAhead.Api,
                     }
                 }, relatedEvent
                 .filter { it.text.isEmpty() }.map { ValidationState.IDLE })
+                .startWith(TypeAhead.ValidationState.IDLE)
     }
 
     companion object {

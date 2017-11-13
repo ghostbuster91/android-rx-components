@@ -28,7 +28,7 @@ class TypeAheadReducer_SchedulersTest {
         val apiSubject = SingleSubject.create<Boolean>()
         val api = mock<TypeAhead.Api> { on { call(any()) } doReturn (apiSubject) }
         val events = PublishRelay.create<TypeAhead.Event.TextChanged>()
-        val stateRelay = BehaviorSubject.createDefault(TypeAhead.initialState)
+        val stateRelay = BehaviorSubject.create<ValidationState>()
         val ioScheduler = TestScheduler()
         val uiScheduler = TestScheduler()
         val debounceScheduler = TestScheduler()

@@ -18,8 +18,4 @@ interface TypeAhead {
         FREE,
         ERROR
     }
-
-    companion object {
-        val initialState = ValidationState.IDLE
-    }
 }
