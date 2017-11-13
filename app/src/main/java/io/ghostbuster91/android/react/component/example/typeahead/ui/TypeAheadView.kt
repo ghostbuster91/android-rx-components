@@ -9,7 +9,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.widget.LinearLayout
 import com.jakewharton.rxbinding2.widget.textChanges
-import com.jakewharton.rxrelay2.Relay
 import com.trello.rxlifecycle2.kotlin.bindToLifecycle
 import io.ghostbuster91.android.react.component.example.R
 import io.ghostbuster91.android.react.component.example.common.ReactiveView
@@ -18,7 +17,7 @@ import io.ghostbuster91.android.react.component.example.typeahead.TypeAhead.Vali
 import io.reactivex.Observable
 import kotlinx.android.synthetic.main.type_ahead_view.view.*
 
-class TypeAheadView : LinearLayout, ReactiveView<ValidationState> {
+class TypeAheadView : LinearLayout, ReactiveView<Event.TextChanged, ValidationState> {
     constructor(context: Context) : super(context)
 
     constructor(context: Context, attrs: AttributeSet?) : super(context, attrs)
@@ -32,19 +31,13 @@ class TypeAheadView : LinearLayout, ReactiveView<ValidationState> {
         LayoutInflater.from(context).inflate(R.layout.type_ahead_view, this, true)
     }
 
-    override fun bind(events: Relay<Any>, states: Observable<ValidationState>, identifier: String) {
-        bindEvents(events, identifier)
-        bindStates(states)
-    }
-
-    private fun bindEvents(events: Relay<Any>, identifier: String) {
-        typeAheadInput.textChanges()
+    override fun bindEvents(identifier: String): Observable<Event.TextChanged> {
+        return typeAheadInput.textChanges()
                 .bindToLifecycle(this)
                 .map { Event.TextChanged(it.toString(), identifier) }
-                .subscribe(events)
     }
 
-    private fun bindStates(states: Observable<ValidationState>) {
+    override fun subscribe(states: Observable<ValidationState>) {
         states
                 .bindToLifecycle(this)
                 .distinctUntilChanged()

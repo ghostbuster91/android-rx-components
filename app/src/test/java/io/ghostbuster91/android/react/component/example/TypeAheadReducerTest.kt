@@ -5,13 +5,11 @@ import com.elpassion.mspek.MiniSpek.o
 import com.elpassion.mspek.MiniSpekRunner
 import com.jakewharton.rxrelay2.PublishRelay
 import com.nhaarman.mockito_kotlin.*
-import io.ghostbuster91.android.react.component.example.typeahead.TypeAhead
 import io.ghostbuster91.android.react.component.example.typeahead.TypeAhead.*
 import io.ghostbuster91.android.react.component.example.typeahead.TypeAheadReducer
 import io.ghostbuster91.android.react.component.example.utils.assertLastValue
 import io.reactivex.schedulers.Schedulers
 import io.reactivex.schedulers.TestScheduler
-import io.reactivex.subjects.BehaviorSubject
 import io.reactivex.subjects.SingleSubject
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -26,14 +24,10 @@ class TypeAheadReducerTest {
     fun should() = mspek("start") {
         var apiSubject = SingleSubject.create<Boolean>()
         val api = mock<Api> { on { call(any()) } doAnswer { apiSubject = SingleSubject.create();apiSubject } }
-        val stateRelay = BehaviorSubject.create<TypeAhead.ValidationState>()
         val scheduler = TestScheduler()
 
         val reducer = TypeAheadReducer(api, ioScheduler = Schedulers.trampoline(), uiScheduler = Schedulers.trampoline(), debounceScheduler = scheduler)
-        reducer.run {
-            invoke(events, stateRelay).subscribe(stateRelay)
-        }
-        val state = stateRelay.test()
+        val state = reducer.invoke(events).test()
 
         "show nothing on start" o {
             state.assertLastValue(ValidationState.IDLE)

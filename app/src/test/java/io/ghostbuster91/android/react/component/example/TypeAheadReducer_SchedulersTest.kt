@@ -13,7 +13,6 @@ import io.ghostbuster91.android.react.component.example.typeahead.TypeAhead.Vali
 import io.ghostbuster91.android.react.component.example.typeahead.TypeAheadReducer
 import io.ghostbuster91.android.react.component.example.utils.assertLastValue
 import io.reactivex.schedulers.TestScheduler
-import io.reactivex.subjects.BehaviorSubject
 import io.reactivex.subjects.SingleSubject
 import org.junit.Assert
 import org.junit.Test
@@ -28,16 +27,12 @@ class TypeAheadReducer_SchedulersTest {
         val apiSubject = SingleSubject.create<Boolean>()
         val api = mock<TypeAhead.Api> { on { call(any()) } doReturn (apiSubject) }
         val events = PublishRelay.create<TypeAhead.Event.TextChanged>()
-        val stateRelay = BehaviorSubject.create<ValidationState>()
         val ioScheduler = TestScheduler()
         val uiScheduler = TestScheduler()
         val debounceScheduler = TestScheduler()
 
         val reducer = TypeAheadReducer(api, ioScheduler = ioScheduler, uiScheduler = uiScheduler, debounceScheduler = debounceScheduler)
-        reducer.run {
-            invoke(events, stateRelay).subscribe(stateRelay)
-        }
-        val state = stateRelay.test()
+        val state = reducer.invoke(events).test()
 
         "after text changed" o {
             events.accept(Event.TextChanged("a", reducer.identifier))

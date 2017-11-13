@@ -29,10 +29,12 @@ var typAheadApiProvider: () -> TypeAhead.Api = {
 }
 
 data class State(val firstTypeAhead: TypeAhead.ValidationState,
-                 val secondTypeAhead: TypeAhead.ValidationState)
+                 val secondTypeAhead: TypeAhead.ValidationState,
+                 val isLoginButtonEnabled: Boolean)
 
 val firstTypeAheadReducer by lazy { createTypeAheadReducer() }
 val secondTypeAheadReducer by lazy { createTypeAheadReducer() }
+val exampleReducer by lazy { ExampleReducer(firstTypeAheadReducer, secondTypeAheadReducer) }
 
 private fun createTypeAheadReducer() =
         TypeAheadReducer(

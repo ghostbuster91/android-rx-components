@@ -2,6 +2,7 @@
     package="io.ghostbuster91.android.react.component.example">
 
     <application
+        android:name=".RxApplication"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"

@@ -1,5 +1,7 @@
 package io.ghostbuster91.android.react.component.example.typeahead
 
+import io.ghostbuster91.android.react.component.example.common.Identifiable
+import io.ghostbuster91.android.react.component.example.common.RandomIdentifier
 import io.ghostbuster91.android.react.component.example.common.Reducer
 import io.ghostbuster91.android.react.component.example.common.startWith
 import io.ghostbuster91.android.react.component.example.typeahead.TypeAhead.ValidationState
@@ -7,17 +9,14 @@ import io.reactivex.Observable
 import io.reactivex.Observable.merge
 import io.reactivex.Scheduler
 import io.reactivex.Single
-import java.util.*
 import java.util.concurrent.TimeUnit
 
 class TypeAheadReducer(private val api: TypeAhead.Api,
                        private val debounceScheduler: Scheduler,
                        private val ioScheduler: Scheduler,
-                       private val uiScheduler: Scheduler) : Reducer<Any, TypeAhead.ValidationState> {
+                       private val uiScheduler: Scheduler) : Reducer<TypeAhead.ValidationState>, Identifiable by RandomIdentifier() {
 
-    override val identifier: String = UUID.randomUUID().toString()
-
-    override fun invoke(events: Observable<out Any>, states: Observable<TypeAhead.ValidationState>): Observable<TypeAhead.ValidationState> {
+    override fun invoke(events: Observable<out Any>): Observable<TypeAhead.ValidationState> {
         val relatedEvent = events
                 .ofType(TypeAhead.Event.TextChanged::class.java)
                 .filter { it.identifier == identifier }
