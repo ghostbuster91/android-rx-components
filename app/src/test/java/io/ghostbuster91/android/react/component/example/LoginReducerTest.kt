@@ -5,6 +5,7 @@ import com.elpassion.mspek.MiniSpek.o
 import com.elpassion.mspek.MiniSpekRunner
 import com.jakewharton.rxrelay2.PublishRelay
 import io.ghostbuster91.android.react.component.example.common.Reducer
+import io.ghostbuster91.android.react.component.example.login.LoginReducer
 import io.ghostbuster91.android.react.component.example.typeahead.TypeAhead
 import io.ghostbuster91.android.react.component.example.utils.assertLastValueThat
 import io.reactivex.Observable
@@ -12,7 +13,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 @RunWith(MiniSpekRunner::class)
-class ExampleReducerTest {
+class LoginReducerTest {
 
     @Test
     fun should() = MiniSpek.mspek("start") {
@@ -30,7 +31,7 @@ class ExampleReducerTest {
                 }
             }
 
-            val states = ExampleReducer(firstTypeAheadReducer, secondTypeAheadReducer).invoke(events).test()
+            val states = LoginReducer(firstTypeAheadReducer, secondTypeAheadReducer).invoke(events).test()
 
             states.assertLastValueThat { !isLoginButtonEnabled }
         }
@@ -47,7 +48,7 @@ class ExampleReducerTest {
                 }
             }
 
-            val states = ExampleReducer(firstTypeAheadReducer, secondTypeAheadReducer).invoke(events).test()
+            val states = LoginReducer(firstTypeAheadReducer, secondTypeAheadReducer).invoke(events).test()
             states.assertLastValueThat { isLoginButtonEnabled }
         }
     }

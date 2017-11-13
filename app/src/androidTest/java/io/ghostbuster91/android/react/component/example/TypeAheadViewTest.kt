@@ -8,6 +8,7 @@ import com.elpassion.android.commons.espresso.typeText
 import com.nhaarman.mockito_kotlin.any
 import com.nhaarman.mockito_kotlin.doAnswer
 import com.nhaarman.mockito_kotlin.mock
+import io.ghostbuster91.android.react.component.example.login.ui.LoginActivity
 import io.ghostbuster91.android.react.component.example.typeahead.TypeAhead
 import io.reactivex.subjects.SingleSubject
 import org.junit.Before
@@ -23,7 +24,7 @@ class TypeAheadViewTest {
 
     @Rule
     @JvmField
-    val rule = ActivityTestRule<ExampleActivity>(ExampleActivity::class.java)
+    val rule = ActivityTestRule<LoginActivity>(LoginActivity::class.java)
 
     @Before
     fun setUp() {

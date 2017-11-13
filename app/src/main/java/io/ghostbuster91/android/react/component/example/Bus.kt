@@ -2,6 +2,8 @@ package io.ghostbuster91.android.react.component.example
 
 import com.jakewharton.rxrelay2.BehaviorRelay
 import com.jakewharton.rxrelay2.PublishRelay
+import io.ghostbuster91.android.react.component.example.login.Login
+import io.ghostbuster91.android.react.component.example.login.LoginReducer
 import io.ghostbuster91.android.react.component.example.typeahead.TypeAhead
 import io.ghostbuster91.android.react.component.example.typeahead.TypeAheadReducer
 import io.reactivex.Single
@@ -11,8 +13,8 @@ import java.util.*
 import java.util.concurrent.TimeUnit
 
 val events by lazy { PublishRelay.create<Any>() }
-val states: BehaviorRelay<State> by lazy {
-    BehaviorRelay.create<State>()
+val states: BehaviorRelay<Login.State> by lazy {
+    BehaviorRelay.create<Login.State>()
 }
 var typAheadApiProvider: () -> TypeAhead.Api = {
     object : TypeAhead.Api {
@@ -28,13 +30,9 @@ var typAheadApiProvider: () -> TypeAhead.Api = {
     }
 }
 
-data class State(val firstTypeAhead: TypeAhead.ValidationState,
-                 val secondTypeAhead: TypeAhead.ValidationState,
-                 val isLoginButtonEnabled: Boolean)
-
 val firstTypeAheadReducer by lazy { createTypeAheadReducer() }
 val secondTypeAheadReducer by lazy { createTypeAheadReducer() }
-val exampleReducer by lazy { ExampleReducer(firstTypeAheadReducer, secondTypeAheadReducer) }
+val exampleReducer by lazy { LoginReducer(firstTypeAheadReducer, secondTypeAheadReducer) }
 
 private fun createTypeAheadReducer() =
         TypeAheadReducer(
